@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Restaurant Management System - Home</title>
+</head>
+<body>
+    <h1>Welcome to the Restaurant Management System</h1>
+    <nav>
+        <ul>
+            <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
+            <li><a href="{% url 'orders:create_order' %}">Orders</a></li>
+            <li><a href="{% url 'menu_list' %}">Menu</a></li>
+            <li><a href="{% url 'staff_list' %}">Staff</a></li>
+            <li><a href="{% url 'customer_list' %}">Customers</a></li>
+            <li><a href="{% url 'signin' %}">Sign In</a></li>
+            <li><a href="{% url 'signup' %}">Sign Up</a></li>
+        </ul>
+    </nav>
+</body>
+</html>

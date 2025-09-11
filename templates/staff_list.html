@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Staff List</title>
+</head>
+<body>
+    <h2>Staff Members</h2>
+    <ul>
+        {% for staff in staff_members %}
+            <li>{{ staff.user.username }} - {{ staff.role.name }}</li>
+        {% empty %}
+            <li>No staff members found.</li>
+        {% endfor %}
+    </ul>
+    <a href="{% url 'home' %}">Back to Home</a>
+</body>
+</html>

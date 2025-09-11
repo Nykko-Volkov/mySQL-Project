@@ -9,7 +9,7 @@ class StaffRole(models.Model):
         return self.name
     
 
-class staff (models.Model):
+class Staff(models.Model):
     GENDER  = (("M","Male"),("F","Female"))
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='staff_profile')
     role = models.ForeignKey(StaffRole, on_delete=models.PROTECT,related_name='staff_members',default=1)

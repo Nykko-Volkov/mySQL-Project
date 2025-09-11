@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import StaffRole, staff
+from .models import StaffRole, Staff
 # Register your models here.
 
 @admin.register(StaffRole)
@@ -9,7 +9,7 @@ class StaffRoleAdmin(admin.ModelAdmin):
     ordering = ('name',)
     list_per_page = 20
 
-@admin.register(staff)
+@admin.register(Staff)
 class StaffAdmin(admin.ModelAdmin):
     list_display = ('user', 'role')
     
