@@ -16,7 +16,7 @@ def create_order(request):
             order_item.unit_price = order_item.product.price
             order_item.line_total = order_item.quantity * order_item.unit_price
             order_item.save()
-            return redirect("create_order")  # stay on same page
+            return redirect("orders:create_order")  # stay on same page
     else:
         order_form = OrderForm()
         order_item_form = OrderItemForm()

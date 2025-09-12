@@ -1,17 +1,45 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Menu</title>
-</head>
-<body>
-    <h2>Menu</h2>
-    <ul>
+{% extends 'base.html' %}
+
+{% block title %}Menu{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col">
+            <h2 class="h3">Menu Items</h2>
+        </div>
+        {% if user.is_staff %}
+        <div class="col text-end">
+            <a href="#" class="btn btn-primary">Add New Item</a>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="row row-cols-1 row-cols-md-3 g-4">
         {% for product in products %}
-            <li>{{ product.name }} - ${{ product.price }}</li>
+            <div class="col">
+                <div class="card h-100">
+                    {% if product.image %}
+                        <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title">{{ product.name }}</h5>
+                        <p class="card-text">{{ product.description|default:'' }}</p>
+                        <p class="card-text"><strong>${{ product.price }}</strong></p>
+                        {% if user.is_staff %}
+                            <a href="#" class="btn btn-sm btn-outline-primary">Edit</a>
+                            <a href="#" class="btn btn-sm btn-outline-danger">Delete</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
         {% empty %}
-            <li>No products found.</li>
+            <div class="col">
+                <div class="alert alert-info">
+                    No menu items found.
+                </div>
+            </div>
         {% endfor %}
-    </ul>
-    <a href="{% url 'home' %}">Back to Home</a>
-</body>
-</html>
+    </div>
+</div>
+{% endblock %}

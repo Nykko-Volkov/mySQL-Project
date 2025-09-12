@@ -1,20 +1,49 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Restaurant Management System - Home</title>
-</head>
-<body>
-    <h1>Welcome to the Restaurant Management System</h1>
-    <nav>
-        <ul>
-            <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
-            <li><a href="{% url 'orders:create_order' %}">Orders</a></li>
-            <li><a href="{% url 'menu_list' %}">Menu</a></li>
-            <li><a href="{% url 'staff_list' %}">Staff</a></li>
-            <li><a href="{% url 'customer_list' %}">Customers</a></li>
-            <li><a href="{% url 'signin' %}">Sign In</a></li>
-            <li><a href="{% url 'signup' %}">Sign Up</a></li>
-        </ul>
-    </nav>
-</body>
-</html>
+{% extends 'base.html' %}
+
+{% block title %}Home - Restaurant Management System{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center align-items-center" style="min-height: 70vh;">
+    <div class="col-md-8 text-center">
+        <h1 class="display-4 mb-4">Welcome to the Restaurant Management System</h1>
+        {% if not user.is_authenticated %}
+            <p class="lead mb-4">Please sign in to access the management system.</p>
+            <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+                <a href="{% url 'signin' %}" class="btn btn-primary btn-lg px-4 gap-3">Sign In</a>
+                <a href="{% url 'signup' %}" class="btn btn-outline-secondary btn-lg px-4">Sign Up</a>
+            </div>
+        {% else %}
+            <p class="lead mb-4">What would you like to manage today?</p>
+            <div class="row g-4 py-5 row-cols-1 row-cols-lg-3">
+                <div class="col d-flex align-items-start">
+                    <div class="card w-100">
+                        <div class="card-body">
+                            <h5 class="card-title">Orders</h5>
+                            <p class="card-text">Create and manage restaurant orders</p>
+                            <a href="{% url 'orders:create_order' %}" class="btn btn-primary">Go to Orders</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col d-flex align-items-start">
+                    <div class="card w-100">
+                        <div class="card-body">
+                            <h5 class="card-title">Menu</h5>
+                            <p class="card-text">Manage your restaurant's menu</p>
+                            <a href="{% url 'menu_list' %}" class="btn btn-primary">Go to Menu</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col d-flex align-items-start">
+                    <div class="card w-100">
+                        <div class="card-body">
+                            <h5 class="card-title">Staff</h5>
+                            <p class="card-text">Manage staff members</p>
+                            <a href="{% url 'staff_list' %}" class="btn btn-primary">Go to Staff</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
