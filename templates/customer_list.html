@@ -13,5 +13,15 @@
         {% endfor %}
     </ul>
     <a href="{% url 'home' %}">Back to Home</a>
+
+    <h3>Add new Customer</h3>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Add Customer</button>
+    </form>
+    
+
+
 </body>
 </html>
