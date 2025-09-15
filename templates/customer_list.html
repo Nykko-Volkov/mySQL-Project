@@ -18,6 +18,9 @@
     <form method="post">
         {% csrf_token %}
         {{ form.as_p }}
+        {% if form.errors %}
+            <div class="errorlist">{{ form.errors }}</div>
+        {% endif %}
         <button type="submit">Add Customer</button>
     </form>
     

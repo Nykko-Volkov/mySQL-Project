@@ -3,22 +3,25 @@
 {% block title %}Staff List{% endblock %}
 
 {% block content %}
+
 <h2>Staff Members</h2>
 <ul>
     {% for staff in staff_members %}
-        <li>{{ staff.name }} - {{ staff.role }} - {{ staff.email }}</li>
+        <li>{{ staff.user.username }} - {{ staff.role.name }} - {{ staff.user.email }}</li>
     {% empty %}
         <li>No staff members found.</li>
     {% endfor %}
 </ul>
 <a href="{% url 'home' %}">Back to Home</a>
 
-
-
 <h3>Add new staff member</h3>
 <form method="post">
     {% csrf_token %}
     {{ form.as_p }}
+    {% if form.errors %}
+        <div class="errorlist">{{ form.errors }}</div>
+    {% endif %}
     <button type="submit">Add Staff Member</button>
+</form>
 
 {% endblock %}
