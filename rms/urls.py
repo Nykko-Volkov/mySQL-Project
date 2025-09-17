@@ -35,4 +35,6 @@ urlpatterns = [
     path('customers/', customers_views.customer_list, name='customer_list'),
     path('menu/', menu_views.menu_list, name='menu_list'),
     path('orders/', include('orders.urls')),
+    path('staff/edit/<int:staff_id>/', staff_views.staff_edit, name='staff_edit'),
+    path('staff/delete/<int:staff_id>/', staff_views.staff_delete, name='staff_delete'),
 ]
