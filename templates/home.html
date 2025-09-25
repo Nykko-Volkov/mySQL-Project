@@ -33,6 +33,10 @@
                         </div>
                     </div>
                 </div>
+
+
+
+
                 <div class="col d-flex align-items-start">
                     <div class="card w-100">
                         <div class="card-body">
@@ -42,6 +46,19 @@
                         </div>
                     </div>
                 </div>
+
+<!-- make order list -->
+
+                <div class="col d-flex align-items-start">
+                    <div class="card w-100">
+                        <div class="card-body">
+                            <h5 class="card-title">All Orders</h5>
+                            <p class="card-text">View and manage all orders</p>
+                            <a href="{% url 'orders:order_list' %}" class="btn btn-primary">Go to Orders</a>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         {% endif %}
     </div>
