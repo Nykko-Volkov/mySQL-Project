@@ -7,6 +7,7 @@ from menu.models import Product
 class Order(models.Model):
     ORDER_TYPE = (("DINE_IN","Dine In"),("TAKEAWAY","Takeaway"),("DELIVERY","Delivery"))
     STATUS = (("PENDING","Pending"),("IN_PROGRESS"," In Progress"),("COMPLETED","Completed"),("CANCELLED","Cancelled"))
+    order_number = models.CharField(max_length=20, unique=True,primary_key=True,auto_created=True)
     customer = models.ForeignKey(Customer, on_delete=models.SET_NULL, null=True, blank=True)
     table = models.ForeignKey(DiningTable, on_delete=models.SET_NULL, null=True, blank=True)
     order_type = models.CharField(max_length=20, choices=ORDER_TYPE)
@@ -22,7 +23,7 @@ class Order(models.Model):
         return f"Order {self.id} - {self.status} - {self.order_type}"
         def total_amount(self):
             return sum(item.line_total for item in self.items.all())
-    
+
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')
     product = models.ForeignKey(Product, on_delete=models.PROTECT)
@@ -31,6 +32,8 @@ class OrderItem(models.Model):
     line_total = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     def __str__(self):
         return f"{self.quantity} x {self.product.name} @ {self.unit_price} each"
+    
+
     
 class Payment(models.Model):
     PAYMENT_METHODS = (("CASH","Cash"),("CARD","Card"),("ONLINE","Online"))

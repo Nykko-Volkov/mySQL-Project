@@ -10,9 +10,9 @@ class OrderItemInline(admin.TabularInline):
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ('id', 'customer', 'status', 'total_amount', 'created_at', 'updated_at')
+    list_display = ('order_number', 'customer', 'status', 'total_amount', 'created_at', 'updated_at')
     list_filter = ('status', 'created_at')
-    search_fields = ('customer__name', 'id')
+    search_fields = ('customer__name', 'order_number')
     ordering = ('-created_at',)
     list_per_page = 20
 
@@ -22,14 +22,20 @@ class OrderAdmin(admin.ModelAdmin):
 @admin.register(OrderItem)
 class OrderItemAdmin(admin.ModelAdmin):   
     list_display = ('order', 'product', 'quantity')
-    search_fields = ('order__id', 'product__name')
+    search_fields = ('order__order_number', 'product__name')
     ordering = ('-order__created_at',)
     list_per_page = 20
+
+
+
 
 @admin.register(Payment)
 class PaymentAdmin(admin.ModelAdmin):
     list_display = ('order', 'amount', 'method', 'status', 'paid_at')
     list_filter = ('status', 'method', 'paid_at')
-    search_fields = ('order__id', 'txn_id')
+    search_fields = ('order__order_number', 'txn_id')
     ordering = ('-paid_at',)
     list_per_page = 20
+
+
+
