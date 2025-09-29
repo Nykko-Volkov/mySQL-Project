@@ -80,12 +80,8 @@ WSGI_APPLICATION = 'rms.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'res_db',
-        'USER':'root',
-        'PASSWORD': '1234', # type: ignore
-        'HOST': 'localhost',
-        'PORT': '3306',
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 
