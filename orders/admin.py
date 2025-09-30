@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Order, OrderItem, Payment
+from .models import Order, OrderItem
 
 # ✅ Inline for OrderItem
 class OrderItemInline(admin.TabularInline):
@@ -25,17 +25,5 @@ class OrderItemAdmin(admin.ModelAdmin):
     search_fields = ('order__order_number', 'product__name')
     ordering = ('-order__created_at',)
     list_per_page = 20
-
-
-
-
-@admin.register(Payment)
-class PaymentAdmin(admin.ModelAdmin):
-    list_display = ('order', 'amount', 'method', 'status', 'paid_at')
-    list_filter = ('status', 'method', 'paid_at')
-    search_fields = ('order__order_number', 'txn_id')
-    ordering = ('-paid_at',)
-    list_per_page = 20
-
 
 

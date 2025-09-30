@@ -32,19 +32,3 @@ class OrderItem(models.Model):
     line_total = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     def __str__(self):
         return f"{self.quantity} x {self.product.name} @ {self.unit_price} each"
-    
-
-    
-class Payment(models.Model):
-    PAYMENT_METHODS = (("CASH","Cash"),("CARD","Card"),("ONLINE","Online"))
-    STAUS = (("PENDING","Pending"),("COMPLETED","Completed"),("FAILED","Failed"))
-    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='payments')
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
-    method = models.CharField(max_length=20, choices=PAYMENT_METHODS)
-    status = models.CharField(max_length=20, choices=STAUS, default="PENDING")
-    txn_id = models.CharField(max_length=100, blank=True, null=True)
-    paid_at = models.DateTimeField(auto_now_add=True)
-    def __str__(self):
-        return f"Payment of {self.amount} for Order {self.order.id} via {self.method}"
-    
-   
