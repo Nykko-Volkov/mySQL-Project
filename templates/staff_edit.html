@@ -1,41 +1,269 @@
-<!-- extend base -->
 {% extends 'base.html' %}
-{% load form_filters %}
 
-{% block title %}Edit Staff Member{% endblock %}
-
-
-<div class="container mt-4">
-    <form action="{% url 'staff:staff_edit' staff_member.id %}" method="post" class="needs-validation" novalidate>
-        {% csrf_token %}
-        <div class="card">
-            <div class="card-header">
-                <h3 class="h5 mb-0">Edit Staff Member</h3>
-            </div>
-            <div class="card-body">
-                {% for field in form %}
-                    <div class="mb-3">
-                        <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
-                        {{ field|addclass:"form-control" }}
-                        {% if field.errors %}
-                            <div class="invalid-feedback d-block">
-                                {{ field.errors|join:", " }}
-                            </div>
-                        {% endif %}
-                        {% if field.help_text %}
-                            <div class="form-text">{{ field.help_text }}</div>
-                        {% endif %}
-                    </div>
-                {% endfor %}
-            </div>
-            <div class="card-footer text-end">
-                <button type="submit" class="btn btn-primary">Save Changes</button>
-                <a href="{% url 'staff:staff_list' %}" class="btn btn-secondary">Cancel</a>
-            </div>
-        </div>          
-
-
-
-
+{% block title %}Edit Staff Member - Restaurant Management{% endblock %}
 
 {% block content %}
+<!-- Page Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1>✏️ Edit Staff Member</h1>
+        <p class="text-muted">Update staff member information and details</p>
+    </div>
+    <a href="{% url 'staff_list' %}" class="btn btn-outline-secondary">← Back to Staff List</a>
+</div>
+
+<!-- Edit Staff Form -->
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card content-card">
+            <div class="card-header">
+                <h3 class="h5 mb-0">Staff Member Information</h3>
+                {% if staff_member %}
+                <small class="text-muted">Editing: {{ staff_member.name }} (ID: #{{ staff_member.id }})</small>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                <form method="post" class="needs-validation" novalidate>
+                    {% csrf_token %}
+                    
+                    <!-- Staff Basic Information -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            {% if form.name %}
+                            <div class="mb-3">
+                                <label for="{{ form.name.id_for_label }}" class="form-label">
+                                    <strong>{{ form.name.label }}</strong>
+                                </label>
+                                {{ form.name }}
+                                {% if form.name.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.name.errors|join:", " }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            {% if form.role %}
+                            <div class="mb-3">
+                                <label for="{{ form.role.id_for_label }}" class="form-label">
+                                    <strong>{{ form.role.label }}</strong>
+                                </label>
+                                {{ form.role }}
+                                {% if form.role.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.role.errors|join:", " }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Contact Information -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            {% if form.email %}
+                            <div class="mb-3">
+                                <label for="{{ form.email.id_for_label }}" class="form-label">
+                                    <strong>{{ form.email.label }}</strong>
+                                </label>
+                                {{ form.email }}
+                                {% if form.email.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.email.errors|join:", " }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            {% if form.phone %}
+                            <div class="mb-3">
+                                <label for="{{ form.phone.id_for_label }}" class="form-label">
+                                    <strong>{{ form.phone.label }}</strong>
+                                </label>
+                                {{ form.phone }}
+                                {% if form.phone.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.phone.errors|join:", " }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Employment Details -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            {% if form.hired_on %}
+                            <div class="mb-3">
+                                <label for="{{ form.hired_on.id_for_label }}" class="form-label">
+                                    <strong>{{ form.hired_on.label }}</strong>
+                                </label>
+                                {{ form.hired_on }}
+                                {% if form.hired_on.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.hired_on.errors|join:", " }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            {% if form.salary %}
+                            <div class="mb-3">
+                                <label for="{{ form.salary.id_for_label }}" class="form-label">
+                                    <strong>{{ form.salary.label }}</strong>
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    {{ form.salary }}
+                                </div>
+                                {% if form.salary.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.salary.errors|join:", " }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Status and Additional Information -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            {% if form.is_active %}
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    {{ form.is_active }}
+                                    <label for="{{ form.is_active.id_for_label }}" class="form-check-label">
+                                        <strong>{{ form.is_active.label }}</strong>
+                                    </label>
+                                </div>
+                                {% if form.is_active.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.is_active.errors|join:", " }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <!-- Additional fields can be added here -->
+                        </div>
+                    </div>
+                    
+                    <!-- Handle any remaining form fields -->
+                    {% for field in form %}
+                        {% if field.name not in "name,role,email,phone,hired_on,salary,is_active" %}
+                        <div class="mb-3">
+                            <label for="{{ field.id_for_label }}" class="form-label">
+                                <strong>{{ field.label }}</strong>
+                            </label>
+                            {{ field }}
+                            {% if field.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ field.errors|join:", " }}
+                                </div>
+                            {% endif %}
+                            {% if field.help_text %}
+                                <div class="form-text">{{ field.help_text }}</div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    <!-- Form Errors -->
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {{ form.non_field_errors }}
+                        </div>
+                    {% endif %}
+                    
+                    <!-- Action Buttons -->
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="{% url 'staff_list' %}" class="btn btn-outline-secondary">
+                            ← Cancel
+                        </a>
+                        <div>
+                            <button type="submit" class="btn btn-primary">
+                                💾 Save Changes
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Staff Information Card -->
+{% if staff_member %}
+<div class="row justify-content-center mt-4">
+    <div class="col-lg-8">
+        <div class="card bg-light">
+            <div class="card-body">
+                <h6 class="card-title">Current Staff Information</h6>
+                <div class="row">
+                    <div class="col-md-6">
+                        <small class="text-muted">Current Role:</small>
+                        <div class="mb-2">
+                            {% if staff_member.role == 'Manager' %}
+                                <span class="badge bg-danger">{{ staff_member.role }}</span>
+                            {% elif staff_member.role == 'Chef' %}
+                                <span class="badge bg-warning">{{ staff_member.role }}</span>
+                            {% elif staff_member.role == 'Waiter' %}
+                                <span class="badge bg-info">{{ staff_member.role }}</span>
+                            {% else %}
+                                <span class="badge bg-secondary">{{ staff_member.role }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <small class="text-muted">Employment Status:</small>
+                        <div class="mb-2">
+                            {% if staff_member.is_active %}
+                                <span class="badge bg-success">Active Employee</span>
+                            {% else %}
+                                <span class="badge bg-danger">Inactive</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% block extra_js %}
+<script>
+    // Form validation
+    (function () {
+        'use strict'
+        var forms = document.querySelectorAll('.needs-validation')
+        Array.prototype.slice.call(forms).forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                }
+                form.classList.add('was-validated')
+            }, false)
+        })
+    })()
+    
+    // Add form-control class to all input fields
+    document.addEventListener('DOMContentLoaded', function() {
+        const inputs = document.querySelectorAll('input, select, textarea');
+        inputs.forEach(function(input) {
+            if (!input.classList.contains('form-check-input')) {
+                input.classList.add('form-control');
+            }
+        });
+    });
+</script>
+{% endblock %}
+{% endblock %}

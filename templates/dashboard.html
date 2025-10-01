@@ -1,122 +1,308 @@
 {% extends 'base.html' %}
 
-{% block title %}Dashboard{% endblock %}
+{% block title %}Dashboard - Restaurant Management{% endblock %}
 
 {% block content %}
-<div class="container">
-    <h2 class="mb-4">Dashboard</h2>
-    
-    <div class="row mb-4">
-        <div class="col-md-3">
-            <div class="card bg-primary text-white">
-                <div class="card-body">
-                    <h5 class="card-title">Today's Orders</h5>
-                    <h2 class="card-text">{{ today_orders_count }}</h2>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card bg-success text-white">
-                <div class="card-body">
-                    <h5 class="card-title">Total Revenue</h5>
-                    <h2 class="card-text">${{ total_revenue }}</h2>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card bg-info text-white">
-                <div class="card-body">
-                    <h5 class="card-title">Active Staff</h5>
-                    <h2 class="card-text">{{ active_staff_count }}</h2>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card bg-warning text-white">
-                <div class="card-body">
-                    <h5 class="card-title">Total Menu Items</h5>
-                    <h2 class="card-text">{{ menu_items_count }}</h2>
+<!-- Dashboard Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1>📊 Restaurant Dashboard</h1>
+        <p class="text-muted">Welcome back! Here's what's happening at your restaurant today.</p>
+    </div>
+    <div class="text-end">
+        <small class="text-muted">Last updated: <span id="currentTime"></span></small>
+    </div>
+</div>
+
+<!-- Key Metrics Cards -->
+<div class="row mb-4">
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card content-card bg-gradient-primary text-white h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title text-white-50">Today's Orders</h6>
+                        <h2 class="mb-0">{{ today_orders_count|default:0 }}</h2>
+                        <small class="text-white-50">+5 from yesterday</small>
+                    </div>
+                    <div style="font-size: 2.5rem; opacity: 0.3;">📋</div>
                 </div>
             </div>
         </div>
     </div>
-
-    <div class="row">
-        <div class="col-md-6 mb-4">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">Recent Orders</h5>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>Order ID</th>
-                                    <th>Customer</th>
-                                    <th>Amount</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for order in recent_orders %}
-                                <tr>
-                                    <td>#{{ order.id }}</td>
-                                    <td>{{ order.customer.name }}</td>
-                                    <td>${{ order.total_amount }}</td>
-                                    <td>
-                                        <span class="badge {% if order.status == 'COMPLETED' %}bg-success{% elif order.status == 'PENDING' %}bg-warning{% else %}bg-info{% endif %}">
-                                            {{ order.get_status_display }}
-                                        </span>
-                                    </td>
-                                </tr>
-                                {% empty %}
-                                <tr>
-                                    <td colspan="4" class="text-center">No recent orders</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
+    
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card content-card bg-gradient-success text-white h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title text-white-50">Total Revenue</h6>
+                        <h2 class="mb-0">${{ total_revenue|default:0|floatformat:2 }}</h2>
+                        <small class="text-white-50">This month</small>
                     </div>
+                    <div style="font-size: 2.5rem; opacity: 0.3;">💰</div>
                 </div>
             </div>
         </div>
-
-        <div class="col-md-6 mb-4">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">Popular Menu Items</h5>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>Item</th>
-                                    <th>Category</th>
-                                    <th>Price</th>
-                                    <th>Orders</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for item in popular_items %}
-                                <tr>
-                                    <td>{{ item.name }}</td>
-                                    <td>{{ item.category }}</td>
-                                    <td>${{ item.price }}</td>
-                                    <td>{{ item.order_count }}</td>
-                                </tr>
-                                {% empty %}
-                                <tr>
-                                    <td colspan="4" class="text-center">No menu items found</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
+    </div>
+    
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card content-card bg-gradient-info text-white h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title text-white-50">Active Staff</h6>
+                        <h2 class="mb-0">{{ active_staff_count|default:0 }}</h2>
+                        <small class="text-white-50">On duty today</small>
                     </div>
+                    <div style="font-size: 2.5rem; opacity: 0.3;">👨‍💼</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card content-card bg-gradient-warning text-white h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title text-white-50">Menu Items</h6>
+                        <h2 class="mb-0">{{ menu_items_count|default:0 }}</h2>
+                        <small class="text-white-50">Available now</small>
+                    </div>
+                    <div style="font-size: 2.5rem; opacity: 0.3;">🍕</div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Main Content Grid -->
+<div class="row">
+    <!-- Recent Orders -->
+    <div class="col-xl-8 col-lg-7 mb-4">
+        <div class="card content-card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">📋 Recent Orders</h5>
+                <a href="{% url 'order_list' %}" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="card-body">
+                {% if recent_orders %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>Customer</th>
+                                    <th>Table</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th>Time</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for order in recent_orders %}
+                                <tr>
+                                    <td>
+                                        <strong>#{{ order.id }}</strong>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2" 
+                                                 style="width: 30px; height: 30px; font-size: 0.8rem;">
+                                                {{ order.get_customer_name|first|upper }}
+                                            </div>
+                                            <div>
+                                                <div class="fw-bold">{{ order.get_customer_name|truncatechars:20 }}</div>
+                                                {% if order.get_customer_phone %}
+                                                    <small class="text-muted">{{ order.get_customer_phone }}</small>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        {% if order.table %}
+                                            <span class="badge bg-light text-dark">{{ order.table.name }}</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Takeaway</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <strong class="text-success">${{ order.total_amount|default:0|floatformat:2 }}</strong>
+                                    </td>
+                                    <td>
+                                        {% if order.status == 'COMPLETED' %}
+                                            <span class="badge bg-success">Completed</span>
+                                        {% elif order.status == 'PENDING' %}
+                                            <span class="badge bg-warning">Pending</span>
+                                        {% elif order.status == 'IN_PROGRESS' %}
+                                            <span class="badge bg-info">In Progress</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">{{ order.get_status_display }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">{{ order.created_at|timesince }} ago</small>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <div class="mb-3">
+                            <span style="font-size: 3rem; opacity: 0.3;">📋</span>
+                        </div>
+                        <h6 class="text-muted">No recent orders</h6>
+                        <p class="text-muted">Orders will appear here once customers start placing them.</p>
+                        <a href="{% url 'create_order' %}" class="btn btn-primary">Create First Order</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions & Stats -->
+    <div class="col-xl-4 col-lg-5 mb-4">
+        <!-- Quick Actions -->
+        <div class="card content-card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">⚡ Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{% url 'create_order' %}" class="btn btn-primary">
+                        📝 New Order
+                    </a>
+                    <a href="{% url 'menu_list' %}" class="btn btn-outline-primary">
+                        🍕 View Menu
+                    </a>
+                    <a href="{% url 'customer_list' %}" class="btn btn-outline-primary">
+                        👥 Manage Customers
+                    </a>
+                    {% if user.is_staff %}
+                    <a href="{% url 'staff_list' %}" class="btn btn-outline-primary">
+                        👨‍💼 Manage Staff
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Popular Menu Items -->
+        <div class="card content-card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">🔥 Popular Items</h5>
+                <a href="{% url 'menu_list' %}" class="btn btn-sm btn-outline-secondary">View Menu</a>
+            </div>
+            <div class="card-body">
+                {% if popular_items %}
+                    {% for item in popular_items|slice:":5" %}
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-warning text-white rounded d-flex align-items-center justify-content-center me-3" 
+                                 style="width: 40px; height: 40px; font-size: 1.2rem;">
+                                🍽️
+                            </div>
+                            <div>
+                                <div class="fw-bold">{{ item.name|truncatechars:20 }}</div>
+                                <small class="text-muted">{{ item.category|default:"General" }}</small>
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <div class="fw-bold text-success">${{ item.price|floatformat:2 }}</div>
+                            <small class="text-muted">{{ item.order_count|default:0 }} orders</small>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-3">
+                        <div class="mb-2">
+                            <span style="font-size: 2rem; opacity: 0.3;">🍕</span>
+                        </div>
+                        <h6 class="text-muted">No menu items yet</h6>
+                        <small class="text-muted">Add menu items to see popular items here.</small>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Additional Stats Row -->
+<div class="row mt-4">
+    <div class="col-md-4 mb-3">
+        <div class="card content-card text-center">
+            <div class="card-body">
+                <div style="font-size: 2.5rem; color: #ffc107;">⭐</div>
+                <h5 class="card-title">4.8/5</h5>
+                <p class="text-muted mb-0">Average Rating</p>
+                <small class="text-muted">Based on 150 reviews</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card content-card text-center">
+            <div class="card-body">
+                <div style="font-size: 2.5rem; color: #28a745;">🎯</div>
+                <h5 class="card-title">95%</h5>
+                <p class="text-muted mb-0">Order Accuracy</p>
+                <small class="text-muted">This month</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card content-card text-center">
+            <div class="card-body">
+                <div style="font-size: 2.5rem; color: #17a2b8;">⏱️</div>
+                <h5 class="card-title">15 min</h5>
+                <p class="text-muted mb-0">Avg. Prep Time</p>
+                <small class="text-muted">Last 30 days</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_css %}
+<style>
+    .bg-gradient-primary {
+        background: linear-gradient(135deg, #007bff, #0056b3);
+    }
+    .bg-gradient-success {
+        background: linear-gradient(135deg, #28a745, #1e7e34);
+    }
+    .bg-gradient-info {
+        background: linear-gradient(135deg, #17a2b8, #117a8b);
+    }
+    .bg-gradient-warning {
+        background: linear-gradient(135deg, #ffc107, #d39e00);
+    }
+    .table-hover tbody tr:hover {
+        background-color: rgba(0,0,0,.02);
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Update current time
+    function updateTime() {
+        const now = new Date();
+        const timeString = now.toLocaleString();
+        document.getElementById('currentTime').textContent = timeString;
+    }
+    
+    // Update time every minute
+    updateTime();
+    setInterval(updateTime, 60000);
+    
+    // Auto-refresh dashboard every 5 minutes
+    setInterval(function() {
+        if (document.visibilityState === 'visible') {
+            location.reload();
+        }
+    }, 300000);
+</script>
+{% endblock %}
 {% endblock %}

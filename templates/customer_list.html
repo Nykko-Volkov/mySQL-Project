@@ -1,30 +1,224 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Customer List</title>
-</head>
-<body>
-    <h2>Customers</h2>
-    <ul>
+{% extends 'base.html' %}
+
+{% block title %}Customer Management - Restaurant Management{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1>👥 Customer Management</h1>
+        <p class="text-muted">Manage registered customers and their information</p>
+    </div>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCustomerModal">
+        + Add New Customer
+    </button>
+</div>
+
+<!-- Customers List -->
+{% if customers %}
+    <div class="row">
         {% for customer in customers %}
-            <li>{{ customer.name }} - {{ customer.email }}</li>
-        {% empty %}
-            <li>No customers found.</li>
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card content-card h-100">
+                <div class="card-body">
+                    <!-- Customer Header -->
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" 
+                             style="width: 50px; height: 50px; font-size: 1.5rem;">
+                            {{ customer.name|first|upper }}
+                        </div>
+                        <div>
+                            <h5 class="card-title mb-1">{{ customer.name }}</h5>
+                            <small class="text-muted">Customer ID: #{{ customer.id }}</small>
+                        </div>
+                    </div>
+                    
+                    <!-- Customer Details -->
+                    <div class="mb-3">
+                        <div class="mb-2">
+                            <strong>📧 Email:</strong>
+                            <span class="text-muted">{{ customer.email }}</span>
+                        </div>
+                        <div class="mb-2">
+                            <strong>📱 Phone:</strong>
+                            <span class="text-muted">{{ customer.phone|default:"Not provided" }}</span>
+                        </div>
+                        <div class="mb-2">
+                            <strong>📍 Address:</strong>
+                            <span class="text-muted">{{ customer.address|default:"Not provided" }}</span>
+                        </div>
+                        <div class="mb-2">
+                            <strong>📅 Joined:</strong>
+                            <span class="text-muted">{{ customer.created_at|date:"M d, Y" }}</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Customer Stats -->
+                    <div class="mb-3">
+                        <div class="row text-center">
+                            <div class="col-6">
+                                <strong class="text-primary">{{ customer.order_set.count }}</strong>
+                                <small class="d-block text-muted">Total Orders</small>
+                            </div>
+                            <div class="col-6">
+                                <strong class="text-success">$0.00</strong>
+                                <small class="d-block text-muted">Total Spent</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="mt-auto">
+                        <div class="btn-group w-100">
+                            <a href="#" class="btn btn-sm btn-outline-primary">View Orders</a>
+                            <button class="btn btn-sm btn-outline-secondary" 
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#editCustomerModal{{ customer.id }}">
+                                Edit
+                            </button>
+                            <a href="#" class="btn btn-sm btn-outline-danger">Delete</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
         {% endfor %}
-    </ul>
-    <a href="{% url 'home' %}">Back to Home</a>
-
-    <h3>Add new Customer</h3>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        {% if form.errors %}
-            <div class="errorlist">{{ form.errors }}</div>
-        {% endif %}
-        <button type="submit">Add Customer</button>
-    </form>
+    </div>
     
+    <!-- Customer Statistics -->
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h6 class="card-title">Customer Statistics</h6>
+                    <div class="row text-center">
+                        <div class="col-md-3">
+                            <strong>{{ customers|length }}</strong>
+                            <small class="d-block text-muted">Total Customers</small>
+                        </div>
+                        <div class="col-md-3">
+                            <strong>{{ customers|length }}</strong>
+                            <small class="d-block text-muted">Active Customers</small>
+                        </div>
+                        <div class="col-md-3">
+                            <strong>0</strong>
+                            <small class="d-block text-muted">New This Month</small>
+                        </div>
+                        <div class="col-md-3">
+                            <strong>$0.00</strong>
+                            <small class="d-block text-muted">Avg. Order Value</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% else %}
+    <!-- Empty State -->
+    <div class="text-center py-5">
+        <div class="mb-4">
+            <span style="font-size: 4rem; opacity: 0.3;">👥</span>
+        </div>
+        <h3 class="text-muted">No customers yet</h3>
+        <p class="text-muted mb-4">Add your first customer to get started</p>
+        <button class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#addCustomerModal">
+            Add First Customer
+        </button>
+    </div>
+{% endif %}
 
+<!-- Add Customer Modal -->
+<div class="modal fade" id="addCustomerModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add New Customer</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post">
+                <div class="modal-body">
+                    {% csrf_token %}
+                    {% if form %}
+                        <div class="mb-3">
+                            {{ form.name.label_tag }}
+                            {{ form.name }}
+                            {% if form.name.errors %}
+                                <div class="text-danger">{{ form.name.errors }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="mb-3">
+                            {{ form.email.label_tag }}
+                            {{ form.email }}
+                            {% if form.email.errors %}
+                                <div class="text-danger">{{ form.email.errors }}</div>
+                            {% endif %}
+                        </div>
+                        {% if form.phone %}
+                        <div class="mb-3">
+                            {{ form.phone.label_tag }}
+                            {{ form.phone }}
+                            {% if form.phone.errors %}
+                                <div class="text-danger">{{ form.phone.errors }}</div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                        {% if form.address %}
+                        <div class="mb-3">
+                            {{ form.address.label_tag }}
+                            {{ form.address }}
+                            {% if form.address.errors %}
+                                <div class="text-danger">{{ form.address.errors }}</div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    {% endif %}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Customer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
-</body>
-</html>
+<!-- Edit Customer Modals (one for each customer) -->
+{% for customer in customers %}
+<div class="modal fade" id="editCustomerModal{{ customer.id }}" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Customer: {{ customer.name }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" action="{% url 'customer_list' %}">
+                <div class="modal-body">
+                    {% csrf_token %}
+                    <input type="hidden" name="customer_id" value="{{ customer.id }}">
+                    <div class="mb-3">
+                        <label class="form-label">Name</label>
+                        <input type="text" class="form-control" name="name" value="{{ customer.name }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-control" name="email" value="{{ customer.email }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Phone</label>
+                        <input type="text" class="form-control" name="phone" value="{{ customer.phone|default:'' }}">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Address</label>
+                        <textarea class="form-control" name="address" rows="3">{{ customer.address|default:'' }}</textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Update Customer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% endblock %}

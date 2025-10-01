@@ -1,25 +1,30 @@
-<!-- extend base -->
 {% extends 'base.html' %}
 
-{% block title %}Order List{% endblock %}
+{% block title %}All Orders - Restaurant Management{% endblock %}
 
 {% block extra_css %}
 <style>
-    .orders-card {
-        background: #fff;
-        border: 1px solid #e9ecef;
-        border-radius: .5rem;
-        padding: 1rem;
-        box-shadow: 0 1px 2px rgba(0,0,0,.03);
+    /* Order status badges with different colors */
+    .status-PENDING { background-color: #ffc107 !important; color: #000; }
+    .status-IN_PROGRESS { background-color: #17a2b8 !important; color: #fff; }
+    .status-COMPLETED { background-color: #28a745 !important; color: #fff; }
+    .status-CANCELLED { background-color: #dc3545 !important; color: #fff; }
+    
+    /* Order card styling */
+    .order-card {
+        border-left: 4px solid #007bff;
+        transition: all 0.2s;
     }
-    .table-compact td, .table-compact th { padding: .45rem .6rem; }
-    .text-muted-sm { color: #6c757d; font-size: .9rem; }
-    .badge-status { font-size: .78rem; padding: .35em .5em; border-radius: .35rem; }
-    .table-responsive { margin-top: .75rem; }
-    .completed-section { margin-top: 1.25rem; }
-    .collapse-card { border-left: 3px solid #0d6efd; padding: .75rem; border-radius: .25rem; background: #f8f9fa; }
-    .status-form { display: inline-flex; gap: .5rem; align-items: center; }
-    .status-select { min-width: 10rem; }
+    .order-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    
+    /* Customer info styling */
+    .customer-info {
+        font-size: 0.9em;
+        color: #6c757d;
+    }
 </style>
 {% endblock %}
 

@@ -1,20 +1,215 @@
 {% extends 'base.html' %}
-{% load form_filters %}
 
-{% block title %}Sign Up{% endblock %}
+{% block title %}Sign Up - Restaurant Management{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-6 col-lg-4">
-        <div class="card">
-            <div class="card-body">
-                <h2 class="card-title text-center mb-4">Create Account</h2>
-                <form method="post">
+<div class="row justify-content-center min-vh-100 align-items-center">
+    <div class="col-md-8 col-lg-6">
+        <!-- Welcome Card -->
+        <div class="text-center mb-4">
+            <div class="mb-3">
+                <span style="font-size: 4rem;">🍽️</span>
+            </div>
+            <h2 class="h3 text-primary">Join Our Team!</h2>
+            <p class="text-muted">Create your account to access the restaurant management system</p>
+        </div>
+        
+        <!-- Sign Up Form -->
+        <div class="card content-card shadow-lg">
+            <div class="card-body p-4">
+                <h3 class="card-title text-center mb-4">📝 Create Account</h3>
+                
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+                
+                <form method="post" class="needs-validation" novalidate>
                     {% csrf_token %}
+                    
+                    <!-- Username Field -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="id_username" class="form-label">
+                                    <strong>👤 Username</strong>
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-user"></i>
+                                    </span>
+                                    {% if form.username %}
+                                        {{ form.username }}
+                                    {% else %}
+                                        <input type="text" class="form-control" id="id_username" name="username" required>
+                                    {% endif %}
+                                </div>
+                                {% if form.username.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.username.errors|join:", " }}
+                                    </div>
+                                {% endif %}
+                                {% if form.username.help_text %}
+                                    <div class="form-text">{{ form.username.help_text }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- Email Field -->
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="id_email" class="form-label">
+                                    <strong>📧 Email</strong>
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-envelope"></i>
+                                    </span>
+                                    {% if form.email %}
+                                        {{ form.email }}
+                                    {% else %}
+                                        <input type="email" class="form-control" id="id_email" name="email">
+                                    {% endif %}
+                                </div>
+                                {% if form.email.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.email.errors|join:", " }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- First and Last Name -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            {% if form.first_name %}
+                            <div class="mb-3">
+                                <label for="{{ form.first_name.id_for_label }}" class="form-label">
+                                    <strong>📛 First Name</strong>
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-user-circle"></i>
+                                    </span>
+                                    {{ form.first_name }}
+                                </div>
+                                {% if form.first_name.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.first_name.errors|join:", " }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            {% if form.last_name %}
+                            <div class="mb-3">
+                                <label for="{{ form.last_name.id_for_label }}" class="form-label">
+                                    <strong>📛 Last Name</strong>
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-user-circle"></i>
+                                    </span>
+                                    {{ form.last_name }}
+                                </div>
+                                {% if form.last_name.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.last_name.errors|join:", " }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Password Fields -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="id_password1" class="form-label">
+                                    <strong>🔒 Password</strong>
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-lock"></i>
+                                    </span>
+                                    {% if form.password1 %}
+                                        {{ form.password1 }}
+                                    {% else %}
+                                        <input type="password" class="form-control" id="id_password1" name="password1" required>
+                                    {% endif %}
+                                </div>
+                                {% if form.password1.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.password1.errors|join:", " }}
+                                    </div>
+                                {% endif %}
+                                {% if form.password1.help_text %}
+                                    <div class="form-text">{{ form.password1.help_text }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="id_password2" class="form-label">
+                                    <strong>🔒 Confirm Password</strong>
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-lock"></i>
+                                    </span>
+                                    {% if form.password2 %}
+                                        {{ form.password2 }}
+                                    {% else %}
+                                        <input type="password" class="form-control" id="id_password2" name="password2" required>
+                                    {% endif %}
+                                </div>
+                                {% if form.password2.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.password2.errors|join:", " }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Role Selection -->
+                    {% if form.role %}
+                    <div class="mb-4">
+                        <label for="{{ form.role.id_for_label }}" class="form-label">
+                            <strong>👔 Role</strong>
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="fas fa-briefcase"></i>
+                            </span>
+                            {{ form.role }}
+                        </div>
+                        {% if form.role.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.role.errors|join:", " }}
+                            </div>
+                        {% endif %}
+                        {% if form.role.help_text %}
+                            <div class="form-text">{{ form.role.help_text }}</div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Handle any other form fields -->
                     {% for field in form %}
+                        {% if field.name not in "username,email,first_name,last_name,password1,password2,role" %}
                         <div class="mb-3">
-                            <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
-                            {{ field|addclass:"form-control" }}
+                            <label for="{{ field.id_for_label }}" class="form-label">
+                                <strong>{{ field.label }}</strong>
+                            </label>
+                            {{ field }}
                             {% if field.errors %}
                                 <div class="invalid-feedback d-block">
                                     {{ field.errors|join:", " }}
@@ -24,16 +219,97 @@
                                 <div class="form-text">{{ field.help_text }}</div>
                             {% endif %}
                         </div>
+                        {% endif %}
                     {% endfor %}
-                    <div class="d-grid">
-                        <button type="submit" class="btn btn-primary">Sign Up</button>
+                    
+                    <!-- Terms and Conditions -->
+                    <div class="form-check mb-4">
+                        <input class="form-check-input" type="checkbox" id="agreeTerms" required>
+                        <label class="form-check-label text-muted" for="agreeTerms">
+                            I agree to the <a href="#" class="text-primary">Terms of Service</a> and <a href="#" class="text-primary">Privacy Policy</a>
+                        </label>
                     </div>
+                    
+                    <!-- Submit Button -->
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            🚀 Create Account
+                        </button>
+                    </div>
+                    
+                    <!-- Form Errors -->
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger mt-3">
+                            {{ form.non_field_errors }}
+                        </div>
+                    {% endif %}
                 </form>
-                <p class="text-center mt-3">
-                    Already have an account? <a href="{% url 'signin' %}">Sign In</a>
-                </p>
+                
+                <!-- Additional Links -->
+                <div class="text-center mt-4">
+                    <p class="text-muted mb-2">Already have an account?</p>
+                    <a href="{% url 'signin' %}" class="btn btn-outline-primary">
+                        Sign In Instead
+                    </a>
+                </div>
             </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="text-center mt-4">
+            <small class="text-muted">
+                © 2024 Restaurant Management System
+            </small>
         </div>
     </div>
 </div>
+
+{% block extra_js %}
+<script>
+    // Form validation
+    (function () {
+        'use strict'
+        var forms = document.querySelectorAll('.needs-validation')
+        Array.prototype.slice.call(forms).forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                }
+                form.classList.add('was-validated')
+            }, false)
+        })
+    })()
+    
+    // Add form-control class to inputs if not already present
+    document.addEventListener('DOMContentLoaded', function() {
+        const inputs = document.querySelectorAll('input:not(.form-check-input), select');
+        inputs.forEach(function(input) {
+            if (!input.classList.contains('form-control')) {
+                input.classList.add('form-control');
+            }
+        });
+    });
+    
+    // Password strength indicator (optional enhancement)
+    const password1 = document.getElementById('id_password1');
+    if (password1) {
+        password1.addEventListener('input', function() {
+            const password = this.value;
+            const strength = checkPasswordStrength(password);
+            // You can add visual feedback here
+        });
+    }
+    
+    function checkPasswordStrength(password) {
+        let strength = 0;
+        if (password.length >= 8) strength++;
+        if (/[a-z]/.test(password)) strength++;
+        if (/[A-Z]/.test(password)) strength++;
+        if (/[0-9]/.test(password)) strength++;
+        if (/[^A-Za-z0-9]/.test(password)) strength++;
+        return strength;
+    }
+</script>
+{% endblock %}
 {% endblock %}

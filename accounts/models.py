@@ -1,15 +1,20 @@
 from django.db import models
-
-# Create your models here.
 from django.contrib.auth.models import AbstractUser
 
 
-class User(AbstractUser): # inherent all properties of AbstractUser to make custom user model
-    class Role(models.TextChoices): # to create a role field with 4 choices
-        ADMIN = 'ADMIN', 'Admin'
-        MANAGER = 'MANAGER',"Manager"
-        CASHIER = 'CASHIER', 'Cashier'
-        STAFF = 'STAFF', 'Staff'
-    role = models.CharField(max_length=10, choices=Role.choices) # role field with max length 10 and choices from Role class
+class User(AbstractUser):
+    """User accounts for staff to login to the restaurant system"""
+    
+    class Role(models.TextChoices):
+        """Different permission levels for staff"""
+        ADMIN = 'ADMIN', 'Admin'         # Can do everything
+        MANAGER = 'MANAGER', "Manager"   # Can manage orders and staff
+        CASHIER = 'CASHIER', 'Cashier'   # Can take orders and payments
+        STAFF = 'STAFF', 'Staff'         # Basic access
+    
+    # Each user has a role that determines what they can do
+    role = models.CharField(max_length=10, choices=Role.choices)
+    
     def __str__(self):
+        """Show username and role when displaying in admin"""
         return f"{self.username} : {self.role}"

@@ -1,126 +1,260 @@
 {% extends 'base.html' %}
 
-{% block title %}Staff List{% endblock %}
+{% block title %}Staff Management - Restaurant Management{% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="row mb-4">
-        <div class="col">
-            <h2 class="h3">Staff Members</h2>
-        </div>
+<!-- Page Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1>👨‍💼 Staff Management</h1>
+        <p class="text-muted">Manage restaurant staff members and their roles</p>
     </div>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addStaffModal">
+        + Add New Staff Member
+    </button>
+</div>
 
-    <div class="card mb-4">
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Name</th>
-                            <th>Role</th>
-                            <th>Hired On</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for staff in staff_members %}
-                            <tr>
-                                <td>{{ staff.name }}</td>
-                                <td><span class="badge bg-info">{{ staff.role }}</span></td>
-                                <td>{{ staff.hired_on|date:"M d, Y" }}</td>
-                                <td>
-                                    <form action="{% url 'staff_edit' staff.id %}" method="get" style="display:inline;">
-                                        <button class="btn btn-sm btn-outline-primary">Edit</button>
-                                    </form>
-                                    <form action="{% url 'staff_delete' staff.id %}" method="post" style="display:inline;">
-                                        {% csrf_token %}
-                                        <button class="btn btn-sm btn-outline-danger">Delete</button>
-                                    </form>
-                                </td>
-                            </tr>
-                        {% empty %}
-                            <tr>
-                                <td colspan="4" class="text-center text-muted">
-                                    <i class="fas fa-users"></i> No staff members found.
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+<!-- Staff Members List -->
+{% if staff_members %}
+    <div class="row">
+        {% for staff in staff_members %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card content-card h-100">
+                <div class="card-body">
+                    <!-- Staff Header -->
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" 
+                             style="width: 50px; height: 50px; font-size: 1.5rem;">
+                            {{ staff.name|first|upper }}
+                        </div>
+                        <div>
+                            <h5 class="card-title mb-1">{{ staff.name }}</h5>
+                            <small class="text-muted">Staff ID: #{{ staff.id }}</small>
+                        </div>
+                    </div>
+                    
+                    <!-- Staff Details -->
+                    <div class="mb-3">
+                        <div class="mb-2">
+                            <strong>👔 Role:</strong>
+                            {% if staff.role == 'Manager' %}
+                                <span class="badge bg-danger">{{ staff.role }}</span>
+                            {% elif staff.role == 'Chef' %}
+                                <span class="badge bg-warning">{{ staff.role }}</span>
+                            {% elif staff.role == 'Waiter' %}
+                                <span class="badge bg-info">{{ staff.role }}</span>
+                            {% else %}
+                                <span class="badge bg-secondary">{{ staff.role }}</span>
+                            {% endif %}
+                        </div>
+                        <div class="mb-2">
+                            <strong>📧 Email:</strong>
+                            <span class="text-muted">{{ staff.email|default:"Not provided" }}</span>
+                        </div>
+                        <div class="mb-2">
+                            <strong>📱 Phone:</strong>
+                            <span class="text-muted">{{ staff.phone|default:"Not provided" }}</span>
+                        </div>
+                        <div class="mb-2">
+                            <strong>📅 Hired:</strong>
+                            <span class="text-muted">{{ staff.hired_on|date:"M d, Y" }}</span>
+                        </div>
+                        <div class="mb-2">
+                            <strong>💰 Salary:</strong>
+                            <span class="text-success">${{ staff.salary|floatformat:2|default:"0.00" }}</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Employment Status -->
+                    <div class="mb-3">
+                        {% if staff.is_active %}
+                            <span class="badge bg-success">Active Employee</span>
+                        {% else %}
+                            <span class="badge bg-danger">Inactive</span>
+                        {% endif %}
+                        
+                        <!-- Calculate years of service -->
+                        <small class="text-muted d-block mt-1">
+                            {{ staff.hired_on|timesince }} of service
+                        </small>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="mt-auto">
+                        <div class="btn-group w-100">
+                            <a href="{% url 'staff_edit' staff.id %}" class="btn btn-sm btn-outline-primary">Edit</a>
+                            <button class="btn btn-sm btn-outline-secondary" 
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#viewStaffModal{{ staff.id }}">
+                                View Details
+                            </button>
+                            <form action="{% url 'staff_delete' staff.id %}" method="post" style="display:inline;" 
+                                  onsubmit="return confirm('Are you sure you want to delete {{ staff.name }}?')">
+                                {% csrf_token %}
+                                <button class="btn btn-sm btn-outline-danger">Delete</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <!-- Staff Statistics -->
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h6 class="card-title">Staff Statistics</h6>
+                    <div class="row text-center">
+                        <div class="col-md-3">
+                            <strong>{{ staff_members|length }}</strong>
+                            <small class="d-block text-muted">Total Staff</small>
+                        </div>
+                        <div class="col-md-3">
+                            <strong>{{ staff_members|length }}</strong>
+                            <small class="d-block text-muted">Active Staff</small>
+                        </div>
+                        <div class="col-md-3">
+                            <strong>0</strong>
+                            <small class="d-block text-muted">New This Month</small>
+                        </div>
+                        <div class="col-md-3">
+                            <strong>$0.00</strong>
+                            <small class="d-block text-muted">Avg. Salary</small>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-
-    <div class="card">
-        <div class="card-header">
-            <h3 class="h5 mb-0">Add New Staff Member</h3>
+{% else %}
+    <!-- Empty State -->
+    <div class="text-center py-5">
+        <div class="mb-4">
+            <span style="font-size: 4rem; opacity: 0.3;">👨‍💼</span>
         </div>
-        <div class="card-body">
+        <h3 class="text-muted">No staff members yet</h3>
+        <p class="text-muted mb-4">Add your first staff member to get started</p>
+        <button class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#addStaffModal">
+            Add First Staff Member
+        </button>
+    </div>
+{% endif %}
+
+<!-- Add Staff Modal -->
+<div class="modal fade" id="addStaffModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add New Staff Member</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
             <form method="post" class="needs-validation" novalidate>
-                {% csrf_token %}
-                {% for field in form %}
-                    <div class="mb-3">
-                        <label for="{{ field.id_for_label }}" class="form-label">
-                            {{ field.label }}
-                        </label>
-                        {{ field }}
-                        {% if field.errors %}
-                            <div class="invalid-feedback d-block">
-                                {{ field.errors|join:", " }}
+                <div class="modal-body">
+                    {% csrf_token %}
+                    {% if form %}
+                        {% for field in form %}
+                            <div class="mb-3">
+                                <label for="{{ field.id_for_label }}" class="form-label">
+                                    {{ field.label }}
+                                </label>
+                                {{ field }}
+                                {% if field.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ field.errors|join:", " }}
+                                    </div>
+                                {% endif %}
+                                {% if field.help_text %}
+                                    <div class="form-text">{{ field.help_text }}</div>
+                                {% endif %}
                             </div>
-                        {% endif %}
-                        {% if field.help_text %}
-                            <div class="form-text">{{ field.help_text }}</div>
-                        {% endif %}
-                    </div>
-                {% endfor %}
-                {% if form.errors %}
-                    <div class="alert alert-danger">
-                        Please correct the errors below.
-                    </div>
-                {% endif %}
-                <div class="d-grid gap-2">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-plus-circle"></i> Add Staff Member
-                    </button>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Staff Member</button>
                 </div>
             </form>
         </div>
     </div>
-
-    <div class="mt-3">
-        <a href="{% url 'home' %}" class="btn btn-outline-secondary">
-            <i class="fas fa-arrow-left"></i> Back to Home
-        </a>
-    </div>
 </div>
 
-{% block extra_css %}
-<style>
-    .card {
-        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-        border: none;
-        border-radius: 0.5rem;
-    }
-    .card-header {
-        background-color: #f8f9fa;
-        border-bottom: 1px solid rgba(0,0,0,.125);
-    }
-    .table th {
-        font-weight: 600;
-    }
-    .badge {
-        font-weight: 500;
-    }
-    .btn-outline-primary:hover, .btn-outline-danger:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-    }
-    .form-control:focus {
-        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
-    }
-</style>
-{% endblock %}
+<!-- View Staff Detail Modals -->
+{% for staff in staff_members %}
+<div class="modal fade" id="viewStaffModal{{ staff.id }}" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Staff Details: {{ staff.name }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-4 text-center mb-3">
+                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mx-auto" 
+                             style="width: 80px; height: 80px; font-size: 2rem;">
+                            {{ staff.name|first|upper }}
+                        </div>
+                        <h6 class="mt-2">{{ staff.name }}</h6>
+                        <small class="text-muted">ID: #{{ staff.id }}</small>
+                    </div>
+                    <div class="col-md-8">
+                        <table class="table table-borderless">
+                            <tr>
+                                <td><strong>Role:</strong></td>
+                                <td>
+                                    {% if staff.role == 'Manager' %}
+                                        <span class="badge bg-danger">{{ staff.role }}</span>
+                                    {% elif staff.role == 'Chef' %}
+                                        <span class="badge bg-warning">{{ staff.role }}</span>
+                                    {% elif staff.role == 'Waiter' %}
+                                        <span class="badge bg-info">{{ staff.role }}</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">{{ staff.role }}</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Email:</strong></td>
+                                <td>{{ staff.email|default:"Not provided" }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Phone:</strong></td>
+                                <td>{{ staff.phone|default:"Not provided" }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Hired Date:</strong></td>
+                                <td>{{ staff.hired_on|date:"F d, Y" }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Salary:</strong></td>
+                                <td class="text-success">${{ staff.salary|floatformat:2|default:"0.00" }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Status:</strong></td>
+                                <td>
+                                    {% if staff.is_active %}
+                                        <span class="badge bg-success">Active</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Inactive</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <a href="{% url 'staff_edit' staff.id %}" class="btn btn-primary">Edit Staff</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
 
 {% block extra_js %}
 <script>
@@ -140,5 +274,4 @@
     })()
 </script>
 {% endblock %}
-
 {% endblock %}

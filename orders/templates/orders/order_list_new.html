@@ -1,0 +1,164 @@
+{% extends 'base.html' %}
+
+{% block title %}All Orders - Restaurant Management{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Order status badges with different colors */
+    .status-PENDING { background-color: #ffc107 !important; color: #000; }
+    .status-IN_PROGRESS { background-color: #17a2b8 !important; color: #fff; }
+    .status-COMPLETED { background-color: #28a745 !important; color: #fff; }
+    .status-CANCELLED { background-color: #dc3545 !important; color: #fff; }
+    
+    /* Order card styling */
+    .order-card {
+        border-left: 4px solid #007bff;
+        transition: all 0.2s;
+    }
+    .order-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    
+    /* Customer info styling */
+    .customer-info {
+        font-size: 0.9em;
+        color: #6c757d;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>🍽️ All Orders</h1>
+    <a href="{% url 'orders:create_order' %}" class="btn btn-primary">+ New Order</a>
+</div>
+
+<!-- Orders Statistics -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title text-warning">Pending</h5>
+                <h3>{{ orders|length }}</h3>
+                <small class="text-muted">Waiting to start</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title text-info">In Progress</h5>
+                <h3>0</h3>
+                <small class="text-muted">Being prepared</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title text-success">Completed</h5>
+                <h3>0</h3>
+                <small class="text-muted">Ready/Delivered</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title text-danger">Cancelled</h5>
+                <h3>0</h3>
+                <small class="text-muted">Cancelled orders</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Orders List -->
+{% if orders %}
+    <div class="row">
+        {% for order in orders %}
+        <div class="col-md-6 col-lg-4 mb-3">
+            <div class="card order-card content-card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">Order #{{ order.order_number }}</h6>
+                    <span class="badge status-{{ order.status }}">{{ order.get_status_display }}</span>
+                </div>
+                <div class="card-body">
+                    <!-- Customer Information -->
+                    <div class="mb-2">
+                        <strong>Customer:</strong><br>
+                        <span class="customer-info">
+                            {{ order.get_customer_name }}<br>
+                            📞 {{ order.get_customer_phone }}
+                        </span>
+                    </div>
+                    
+                    <!-- Order Details -->
+                    <div class="mb-2">
+                        <strong>Type:</strong> 
+                        <span class="badge bg-secondary">{{ order.get_order_type_display }}</span>
+                    </div>
+                    
+                    {% if order.table %}
+                    <div class="mb-2">
+                        <strong>Table:</strong> {{ order.table.table_number }}
+                    </div>
+                    {% endif %}
+                    
+                    <div class="mb-2">
+                        <strong>Total:</strong> 
+                        <span class="text-success">${{ order.total_amount }}</span>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <small class="text-muted">
+                            Created: {{ order.created_at|date:"M d, Y H:i" }}<br>
+                            {% if order.placed_by %}
+                                By: {{ order.placed_by.username }}
+                            {% endif %}
+                        </small>
+                    </div>
+                    
+                    <!-- Order Items -->
+                    <div class="mb-3">
+                        <small><strong>Items:</strong></small>
+                        <ul class="list-unstyled small">
+                            {% for item in order.items.all %}
+                                <li>{{ item.quantity }}x {{ item.product.name }}</li>
+                            {% empty %}
+                                <li class="text-muted">No items</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Order Actions -->
+                <div class="card-footer">
+                    <form method="post" action="{% url 'orders:change_status' %}" class="d-flex gap-2">
+                        {% csrf_token %}
+                        <input type="hidden" name="order_id" value="{{ order.id }}">
+                        <select name="new_status" class="form-select form-select-sm">
+                            <option value="PENDING" {% if order.status == 'PENDING' %}selected{% endif %}>Pending</option>
+                            <option value="IN_PROGRESS" {% if order.status == 'IN_PROGRESS' %}selected{% endif %}>In Progress</option>
+                            <option value="COMPLETED" {% if order.status == 'COMPLETED' %}selected{% endif %}>Completed</option>
+                            <option value="CANCELLED" {% if order.status == 'CANCELLED' %}selected{% endif %}>Cancelled</option>
+                        </select>
+                        <button type="submit" class="btn btn-sm btn-outline-primary">Update</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="text-center py-5">
+        <div class="mb-4">
+            <span style="font-size: 4rem; opacity: 0.3;">🍽️</span>
+        </div>
+        <h3 class="text-muted">No orders yet</h3>
+        <p class="text-muted mb-4">Create your first order to get started</p>
+        <a href="{% url 'orders:create_order' %}" class="btn btn-primary btn-lg">Create First Order</a>
+    </div>
+{% endif %}
+{% endblock %}
