@@ -10,6 +10,10 @@
         .customer-fields.show { display: block; }
         .form-section { margin-bottom: 25px; padding: 15px; border: 1px solid #dee2e6; border-radius: 8px; }
         .section-title { color: #495057; font-weight: bold; margin-bottom: 15px; }
+        .order-item { position: relative; }
+        .order-item .remove-item { position: absolute; top: 8px; right: 8px; }
+        .formset-empty { display: none; }
+        .compact-label { font-weight: 600; font-size: .9rem; }
     </style>
 </head>
 <body>
@@ -97,14 +101,15 @@
                 
                 <div id="formset-container">
                     {% for form in formset %}
-                        <div class="order-item mb-3 p-3 border rounded">
-                            <div class="row">
+                        <div class="order-item mb-3 p-3 border rounded" data-form-index="{{ forloop.counter0 }}">
+                            <button type="button" class="btn btn-sm btn-danger remove-item" title="Remove item">&times;</button>
+                            <div class="row g-2">
                                 <div class="col-md-8">
-                                    {{ form.product.label_tag }}
+                                    <label class="compact-label">{{ form.product.label }}</label>
                                     {{ form.product }}
                                 </div>
                                 <div class="col-md-4">
-                                    {{ form.quantity.label_tag }}
+                                    <label class="compact-label">{{ form.quantity.label }}</label>
                                     {{ form.quantity }}
                                 </div>
                             </div>
@@ -113,17 +118,24 @@
                     {% endfor %}
                 </div>
                 
-                <!-- add new items first show items and then add new item -->
-                <div class="mt-3">
-                    <select id="product-select" class="form-select">
+                <!-- Controls: select product then add via JS. Keep existing anchor (do not change links) -->
+                <div class="mt-3 d-flex gap-2 align-items-center">
+                    <select id="product-select" class="form-select w-50">
                         <option value="" selected>Select a product to add</option>
                         {% for product in products %}
                             <option value="{{ product.id }}">{{ product.name }} - ${{ product.price }}</option>
                         {% endfor %}
+        
                     </select>
-                    <a href="{% url 'orders:add_item_to_order' %}" class="btn btn-sm btn-outline-secondary">Add Item</a>
-                </div>
 
+                    <!-- Keep original link unchanged as requested -->
+                    <a href="{% url 'orders:add_item_to_order' %}" class="btn btn-sm btn-outline-secondary">Add Item</a>
+
+                    <!-- JS-driven add button to create items in the formset without changing links -->
+                    <button id="add-selected-btn" type="button" class="btn btn-sm btn-primary">Add Selected</button>
+
+                    <div class="ms-auto text-muted">Items: <span id="item-count">{{ formset.total_form_count }}</span></div>
+                </div>
 
             </div>
             
@@ -134,6 +146,10 @@
                 <button type="submit" class="btn btn-primary">Create Order</button>
             </div>
             
+            <!-- Hidden empty form template (rendered server-side) -->
+            <div id="empty-form-template" class="formset-empty">
+                {{ formset.empty_form.as_p|escapejs }}
+            </div>
         </form>
     </div>
 
@@ -141,7 +157,8 @@
     <script>
         // Show/hide customer fields based on customer type selection
         function toggleCustomerFields() {
-            const customerType = document.querySelector('input[name="customer_type"]:checked').value;
+            const radio = document.querySelector('input[name="customer_type"]:checked');
+            const customerType = radio ? radio.value : null;
             const registeredFields = document.getElementById('registered-customer');
             const walkinFields = document.getElementById('walkin-customer');
             
@@ -163,9 +180,143 @@
             
             // Set initial state
             toggleCustomerFields();
+
+            // formset helpers
+            const addBtn = document.getElementById('add-selected-btn');
+            const productSelect = document.getElementById('product-select');
+            const container = document.getElementById('formset-container');
+            const emptyTemplateNode = document.getElementById('empty-form-template');
+            // The empty form HTML was escaped for JS; get the actual HTML string from innerText
+            const emptyFormEscaped = emptyTemplateNode ? emptyTemplateNode.textContent : '';
+            // Unescape the JS-escaped HTML (it was produced by escapejs)
+            function unescapeHtml(jsEscaped) {
+                // Reverse of Django escapejs: create a temporary element and set textContent
+                const t = document.createElement('textarea');
+                t.textContent = jsEscaped;
+                return t.value;
+            }
+            const emptyFormHtml = unescapeHtml(emptyFormEscaped);
+
+            function getTotalFormsInput() {
+                return document.querySelector('input[name="{{ formset.prefix }}-TOTAL_FORMS"]') ||
+                       document.querySelector('input[name="form-TOTAL_FORMS"]');
+            }
+            const totalFormsInput = getTotalFormsInput();
+            function getTotalForms() {
+                return parseInt(totalFormsInput.value, 10);
+            }
+            function setTotalForms(n) {
+                totalFormsInput.value = String(n);
+            }
+
+            function updateItemCount() {
+                const countEl = document.getElementById('item-count');
+                if (countEl) countEl.textContent = String(container.querySelectorAll('.order-item').length);
+            }
+
+            // Add new form to DOM using empty_form template
+            function addForm(productId, productText, quantity) {
+                const index = getTotalForms();
+                if (!emptyFormHtml) return;
+                // Replace the Django __prefix__ placeholder with the current index
+                const formHtml = emptyFormHtml.replace(/__prefix__/g, index);
+                // Create wrapper and insert
+                const wrapper = document.createElement('div');
+                wrapper.className = 'order-item mb-3 p-3 border rounded';
+                wrapper.setAttribute('data-form-index', index);
+                // Add remove button at top-right
+                wrapper.innerHTML = '<button type="button" class="btn btn-sm btn-danger remove-item" title="Remove item">&times;</button>' + formHtml;
+                container.appendChild(wrapper);
+
+                // Set product and quantity if provided
+                const select = wrapper.querySelector('select');
+                const qtyInput = wrapper.querySelector('input[type="number"], input[type="text"]');
+
+                if (select && productId) {
+                    select.value = String(productId);
+                }
+                if (qtyInput && quantity !== undefined) {
+                    qtyInput.value = String(quantity);
+                }
+
+                // Hook up remove button
+                const removeBtn = wrapper.querySelector('.remove-item');
+                if (removeBtn) {
+                    removeBtn.addEventListener('click', function() {
+                        // If a DELETE checkbox exists, mark it and hide; otherwise remove element and adjust TOTAL_FORMS
+                        const deleteCheckbox = wrapper.querySelector('input[type="checkbox"][name$="-DELETE"]');
+                        if (deleteCheckbox) {
+                            deleteCheckbox.checked = true;
+                            wrapper.style.display = 'none';
+                        } else {
+                            wrapper.remove();
+                            // Decrement TOTAL_FORMS and re-index remaining forms to keep form names contiguous
+                            reindexForms();
+                        }
+                        updateItemCount();
+                    });
+                }
+
+                // Increase total forms
+                setTotalForms(index + 1);
+                updateItemCount();
+            }
+
+            // Re-index forms after removal (only used when physically removing forms)
+            function reindexForms() {
+                const items = container.querySelectorAll('.order-item');
+                let idx = 0;
+                items.forEach(item => {
+                    // update data attribute
+                    item.setAttribute('data-form-index', idx);
+                    // update all name/id attributes that contain -<number>-
+                    item.querySelectorAll('[name],[id]').forEach(el => {
+                        if (el.name) {
+                            el.name = el.name.replace(/-(\d+)-/g, `-${idx}-`);
+                        }
+                        if (el.id) {
+                            el.id = el.id.replace(/-(\d+)-/g, `-${idx}-`);
+                        }
+                        // labels referring to ids
+                        if (el.getAttribute('for')) {
+                            el.setAttribute('for', el.getAttribute('for').replace(/-(\d+)-/g, `-${idx}-`));
+                        }
+                    });
+                    idx++;
+                });
+                setTotalForms(idx);
+            }
+
+            // Attach remove handlers for pre-rendered items
+            container.querySelectorAll('.remove-item').forEach(btn => {
+                btn.addEventListener('click', function(ev) {
+                    const wrapper = btn.closest('.order-item');
+                    // If DELETE checkbox exists, mark it and hide wrapper
+                    const deleteCheckbox = wrapper.querySelector('input[type="checkbox"][name$="-DELETE"]');
+                    if (deleteCheckbox) {
+                        deleteCheckbox.checked = true;
+                        wrapper.style.display = 'none';
+                    } else {
+                        wrapper.remove();
+                        reindexForms();
+                    }
+                    updateItemCount();
+                });
+            });
+
+            // Add selected product button handler
+            addBtn.addEventListener('click', function() {
+                const prodVal = productSelect.value;
+                if (!prodVal) {
+                    alert('Please select a product first.');
+                    return;
+                }
+                const qty = 1;
+                addForm(prodVal, productSelect.options[productSelect.selectedIndex].text, qty);
+            });
+
+            updateItemCount();
         });
-        
-        
     </script>
 </body>
 </html>
