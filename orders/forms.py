@@ -75,3 +75,4 @@ OrderItemFormSet = inlineformset_factory(
     extra=1,                   # Start with 1 empty item form
     can_delete=True            # Allow removing items
 )
+

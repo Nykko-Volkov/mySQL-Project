@@ -56,7 +56,8 @@ def create_order(request):
 def order_list(request):
     """Show all orders, newest first"""
     all_orders = Order.objects.all().order_by('-created_at')  # Newest orders first
-    return render(request, "orders/order_list.html", {"orders": all_orders})
+    all_products = Product.objects.all()  # All products for adding items
+    return render(request, "orders/order_list.html", {"orders": all_orders, "products": all_products})
 
 
 def change_status(request):
@@ -73,4 +74,34 @@ def change_status(request):
         except Order.DoesNotExist:
             messages.error(request, 'Order not found')
             
+    return redirect("orders:order_list")  # Go back to order list
+
+
+
+
+
+def add_item_to_order(request):
+    """Add an item to an existing order"""
+    if request.method == "POST":
+        order_id = request.POST.get("order_id")  # Which order to add item to
+        product_id = request.POST.get("product_id")  # Which product to add
+        quantity = request.POST.get("quantity", 1)  # How many (default 1)
+
+        try:
+            order = Order.objects.get(id=order_id)  # Find the order
+            
+            # Create new order item
+            new_item = order.items.create(
+                product_id=product_id,
+                quantity=quantity
+            )
+            new_item.save()  # Prices will be calculated automatically
+            
+            # Recalculate total amount for the order
+            order.total_amount = order.calculate_total()
+            order.save()
+            
+            messages.success(request, f'Added {quantity}x {new_item.product.name} to Order #{order.order_number}')
+        except Order.DoesNotExist:
+            messages.error(request, 'Order not found')
     return redirect("orders:order_list")  # Go back to order list
